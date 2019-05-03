@@ -5,6 +5,11 @@ import tqdm
 import pandas as pd
 import numpy as np
 import cv2
+
+import sys
+sys.path.append("../")
+from cnn_utils.helper_functions import *
+
 fold = os.listdir("input/train/")
 train_df = pd.read_csv("input/train.csv")
 
@@ -15,7 +20,7 @@ def onehot():
     res = tf.one_hot(indices=[0,17499], depth=17500)
     with tf.Session() as sess:
         Y_tr= sess.run(res)
-    return Y_tr
+    return Y_tr.T
 
 def load_jpgs():
     """
@@ -45,7 +50,7 @@ def create_placeholders(n_H0, n_W0, n_C0, n_y):
     n_C0 -- scalar, number of channels of the input
     n_y -- scalar, number of classes
     """
-    X = tf.placeholder(shape=(None, n_H0, n_W0, n_C0),dtype=float32))
+    X = tf.placeholder(shape=(None, n_H0, n_W0, n_C0),dtype=float32)
     Y = tf.placeholder(shape=(None, n_y), dtype=float32)
     return X, Y
 
@@ -86,7 +91,7 @@ def forward_propogation(X, parameters):
             strides=[1,4,4,1],padding='SAME')
     P2 = tf.nn.contrib.layers.flatten(P2)
     Z3 = tf.nn.contrib.layers.fully_connected(P2, num_classes,
-            activation_fn = None
+            activation_fn = None)
 
     return Z3
 
@@ -147,12 +152,12 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=.009,
                 (minibatch_X, minibatch_Y) = minibatch
                 _, temp_cost = sess.run([optimizer, cost],
                         feed_dict={X:minibatch_X, Y:minibatch_Y})
-                    minibatch_cost += temp_cost / num_minibatches
+                minibatch_cost += temp_cost / num_minibatches
 
             if print_cost == True and epoch % 5 == 0:
-            print ("Cost after epoch %i: %f" % (epoch, minibatch_cost))
+                print ("Cost after epoch %i: %f" % (epoch, minibatch_cost))
             if print_cost == True and epoch % 1 == 0:
-            costs.append(minibatch_cost)
+                costs.append(minibatch_cost)
 
 
     # plot the cost
