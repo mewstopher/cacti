@@ -11,6 +11,12 @@ train_df = pd.read_csv("input/train.csv")
 fold = "input/train/"
 train_df.head()
 
+def onehot():
+    res = tf.one_hot(indices=[0,17499], depth=17500)
+    with tf.Session() as sess:
+        Y_tr= sess.run(res)
+    return Y_tr
+
 def load_jpgs():
     """
     loads jpgs, labels into X_tr, Y_tr
