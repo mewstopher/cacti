@@ -5,15 +5,16 @@ import tqdm
 import pandas as pd
 import numpy as np
 import cv2
-
 import sys
-sys.path.append("../")
+sys.path.append("../../")
 from cnn_utils.helper_functions import *
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 
-fold = os.listdir("input/train/")
-train_df = pd.read_csv("input/train.csv")
+fold = os.listdir("../input/train/")
+train_df = pd.read_csv("../input/train.csv")
 
-fold = "input/train/"
+fold = "../input/train/"
 train_df.head()
 
 def onehot():
@@ -41,6 +42,14 @@ def load_jpgs():
     return X_tr, Y_tr
 
 
+def split(X_tr, Y_tr):
+    """
+    splits train,test data
+    """
+    X_train, y_train, X_test, y_test = train_test_split(X_tr, Y_tr)
+    return X_train, y_train, X_test, y_test
+
+
 def create_placeholders(n_H0, n_W0, n_C0, n_y):
     """
     creates placeholders for tensorflow variables
@@ -50,8 +59,8 @@ def create_placeholders(n_H0, n_W0, n_C0, n_y):
     n_C0 -- scalar, number of channels of the input
     n_y -- scalar, number of classes
     """
-    X = tf.placeholder(shape=(None, n_H0, n_W0, n_C0),dtype=float32)
-    Y = tf.placeholder(shape=(None, n_y), dtype=float32)
+    X = tf.placeholder(shape=(None, n_H0, n_W0, n_C0),dtype=tf.float32)
+    Y = tf.placeholder(shape=(None, n_y), dtype=tf.float32)
     return X, Y
 
 
@@ -82,15 +91,15 @@ def forward_propogation(X, parameters):
 
     Z1 = tf.nn.conv2d(X, W1, strides=[1,1,1,1], padding='SAME')
     A1 = tf.nn.relu(Z1)
-    P1 = tf.nn.max_pool(A1, ksize[1,8,8,1], strides=[1,8,8,1],
+    P1 = tf.nn.max_pool(A1, ksize=[1,8,8,1], strides=[1,8,8,1],
             padding='SAME')
     
     Z2 = tf.nn.conv2d(P1, W2, strides=[1,1,1,1], padding='SAME')
     A2 = tf.nn.relu(Z2)
     P2 = tf.nn.max_pool(A2, ksize=[1,4,4,1], 
             strides=[1,4,4,1],padding='SAME')
-    P2 = tf.nn.contrib.layers.flatten(P2)
-    Z3 = tf.nn.contrib.layers.fully_connected(P2, num_classes,
+    P2 = tf.contrib.layers.flatten(P2)
+    Z3 = tf.contrib.layers.fully_connected(P2, 2,
             activation_fn = None)
 
     return Z3
@@ -120,20 +129,20 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=.009,
     num_epochs
     minibatch_size
     """
-    ops.reset_default_graph
+    #ops.reset_default_graph
     tf.set_random_seed(1)
     seed = 3
     (m, n_H0, n_W0, n_C0) = X_train.shape
-    n_y = Y_train.shape
+    n_y = Y_train.shape[1]
     costs = []
 
-    X, Y = create_placeholders(m, n_H0, n_W0, n_C0)
+    X, Y = create_placeholders(n_H0, n_W0, n_C0, n_y)
 
     parameters = initialize_parameters()
 
     Z3 = forward_propogation(X, parameters)
 
-    cost = compute_cost(Z3)
+    cost = compute_cost(Z3, Y)
 
     optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
@@ -180,4 +189,5 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=.009,
     print("Test Accuracy:", test_accuracy)
 
     return train_accuracy, test_accuracy, parameters
+
 
