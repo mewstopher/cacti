@@ -10,6 +10,7 @@ sys.path.append("../../")
 from cnn_utils.helper_functions import *
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
+from tensorflow.python.framework import ops
 
 fold = os.listdir("../input/train/")
 train_df = pd.read_csv("../input/train.csv")
@@ -129,7 +130,7 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=.009,
     num_epochs
     minibatch_size
     """
-    #ops.reset_default_graph
+    ops.reset_default_graph
     tf.set_random_seed(1)
     seed = 3
     (m, n_H0, n_W0, n_C0) = X_train.shape
@@ -169,25 +170,25 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=.009,
                 costs.append(minibatch_cost)
 
 
-    # plot the cost
-    plt.plot(np.squeeze(costs))
-    plt.ylabel('cost')
-    plt.xlabel('iterations (per tens)')
-    plt.title("Learning rate =" + str(learning_rate))
-    plt.show()
+        # plot the cost
+        plt.plot(np.squeeze(costs))
+        plt.ylabel('cost')
+        plt.xlabel('iterations (per tens)')
+        plt.title("Learning rate =" + str(learning_rate))
+        plt.show()
 
-    # Calculate the correct predictions
-    predict_op = tf.argmax(Z3, 1)
-    correct_prediction = tf.equal(predict_op, tf.argmax(Y, 1))
+        # Calculate the correct predictions
+        predict_op = tf.argmax(Z3, 1)
+        correct_prediction = tf.equal(predict_op, tf.argmax(Y, 1))
 
-    # Calculate accuracy on the test set
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-    print(accuracy)
-    train_accuracy = accuracy.eval({X: X_train, Y: Y_train})
-    test_accuracy = accuracy.eval({X: X_test, Y: Y_test})
-    print("Train Accuracy:", train_accuracy)
-    print("Test Accuracy:", test_accuracy)
+        # Calculate accuracy on the test set
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+        print(accuracy)
+        train_accuracy = accuracy.eval({X: X_train, Y: Y_train})
+        test_accuracy = accuracy.eval({X: X_test, Y: Y_test})
+        print("Train Accuracy:", train_accuracy)
+        print("Test Accuracy:", test_accuracy)
 
-    return train_accuracy, test_accuracy, parameters
+        return train_accuracy, test_accuracy, parameters
 
 
