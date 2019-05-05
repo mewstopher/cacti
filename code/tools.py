@@ -115,23 +115,29 @@ def forward_propogation(X, parameters):
     P3 = tf.nn.max_pool(A3, strides=[1,1,1,1],
             ksize=[1,2,2,1], padding='SAME')
 
-    z4 = tf.nn.conv2d(p3, W4, strides=[1,1,1,1], padding='SAME')
+    Z4 = tf.nn.conv2d(P3, W4, strides=[1,1,1,1], padding='SAME')
     A4 = tf.nn.relu(Z4)
     P4 = tf.nn.max_pool(A4, strides=[1,1,1,1],
-            ksize=[1,2,2,1])
-    P4 = tf.contrib.layers.flatten(P2)
-    Z4 = tf.contrib.layers.fully_connected(P2, 2,
+            ksize=[1,2,2,1],padding='SAME')
+
+    Z5 = tf.nn.conv2d(P4, W5, strides=[1,1,1,1], padding='SAME')
+    A5 = tf.nn.relu(Z5)
+    P5 = tf.nn.max_pool(A5, strides=[1,1,1,1],
+            ksize=[1,2,2,1], padding='SAME')
+
+    P5 = tf.contrib.layers.flatten(P5)
+    Z6 = tf.contrib.layers.fully_connected(P5, 2,
             activation_fn = None)
 
-    return Z4
+    return Z6
 
 
-def compute_cost(Z4, Y):
+def compute_cost(Z6, Y):
     """
     computes cost for output layer
     """
 
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=Z4, labels=Y))
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=Z6, labels=Y))
 
     return cost
 
@@ -161,9 +167,9 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=.009,
 
     parameters = initialize_parameters()
 
-    Z4 = forward_propogation(X, parameters)
+    Z6 = forward_propogation(X, parameters)
 
-    cost = compute_cost(Z4, Y)
+    cost = compute_cost(Z6, Y)
 
     optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
@@ -198,7 +204,7 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=.009,
         plt.show()
 
         # Calculate the correct predictions
-        predict_op = tf.argmax(Z3, 1)
+        predict_op = tf.argmax(Z6, 1)
         correct_prediction = tf.equal(predict_op, tf.argmax(Y, 1))
 
         # Calculate accuracy on the test set
