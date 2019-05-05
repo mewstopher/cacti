@@ -10,6 +10,7 @@ sys.path.append("../../")
 from cnn_utils.helper_functions import *
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
+from tensorflow.python.framework import ops
 
 fold = os.listdir("../input/train/")
 train_df = pd.read_csv("../input/train.csv")
@@ -70,12 +71,20 @@ def initialize_parameters():
     shapes are the shape of filters/weights
     """
 
-    W1 = tf.get_variable('W1', [4,4,3,8], initializer=tf.contrib.layers.xavier_initializer(seed = 0))
-    W2 = tf.get_variable('W2', [2,2,8,16], initializer=tf.contrib.layers.xavier_initializer(seed = 0))
+    W1 = tf.get_variable('W1', [3,3,3,64], initializer=tf.contrib.layers.xavier_initializer(seed = 0))
+    W2 = tf.get_variable('W2', [3,3,64,128], initializer=tf.contrib.layers.xavier_initializer(seed = 0))
+    W3 = tf.get_variable('W3', [3,3,128,256], initializer=tf.contrib.layers.xavier_initializer(seed = 0))
+    W4 = tf.get_variable('W4', [3,3,256,512], initializer=tf.contrib.layers.xavier_initializer(seed = 0))
+    W5 = tf.get_variable('W5', [3,3,512,512], initializer=tf.contrib.layers.xavier_initializer(seed = 0))
+
     ### END CODE HERE ###
 
     parameters = {"W1": W1,
-            "W2": W2}
+            "W2": W2,
+            "W3": W3,
+            "W4": W4,
+            "W5": W5
+            }
 
     return parameters
 
@@ -88,29 +97,47 @@ def forward_propogation(X, parameters):
     """
     W1 = parameters['W1']
     W2 = parameters['W2']
+    W3 = parameters['W3']
+    W4 = parameters['W4']
+    W5 = parameters['W5']
 
     Z1 = tf.nn.conv2d(X, W1, strides=[1,1,1,1], padding='SAME')
     A1 = tf.nn.relu(Z1)
-    P1 = tf.nn.max_pool(A1, ksize=[1,8,8,1], strides=[1,8,8,1],
+    P1 = tf.nn.max_pool(A1, ksize=[1,2,2,1], strides=[1,2,2,1],
             padding='SAME')
     
     Z2 = tf.nn.conv2d(P1, W2, strides=[1,1,1,1], padding='SAME')
     A2 = tf.nn.relu(Z2)
-    P2 = tf.nn.max_pool(A2, ksize=[1,4,4,1], 
-            strides=[1,4,4,1],padding='SAME')
-    P2 = tf.contrib.layers.flatten(P2)
-    Z3 = tf.contrib.layers.fully_connected(P2, 2,
+    P2 = tf.nn.max_pool(A2, ksize=[1,2,2,1], 
+            strides=[1,2,2,1],padding='SAME')
+    Z3 = tf.nn.conv2d(P2, W3, strides=[1,1,1,1], padding='SAME')
+    A3 = tf.nn.relu(Z3)
+    P3 = tf.nn.max_pool(A3, strides=[1,1,1,1],
+            ksize=[1,2,2,1], padding='SAME')
+
+    Z4 = tf.nn.conv2d(P3, W4, strides=[1,1,1,1], padding='SAME')
+    A4 = tf.nn.relu(Z4)
+    P4 = tf.nn.max_pool(A4, strides=[1,1,1,1],
+            ksize=[1,2,2,1],padding='SAME')
+
+    Z5 = tf.nn.conv2d(P4, W5, strides=[1,1,1,1], padding='SAME')
+    A5 = tf.nn.relu(Z5)
+    P5 = tf.nn.max_pool(A5, strides=[1,1,1,1],
+            ksize=[1,2,2,1], padding='SAME')
+
+    P5 = tf.contrib.layers.flatten(P5)
+    Z6 = tf.contrib.layers.fully_connected(P5, 2,
             activation_fn = None)
 
-    return Z3
+    return Z6
 
 
-def compute_cost(Z3, Y):
+def compute_cost(Z6, Y):
     """
     computes cost for output layer
     """
 
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=Z3, labels=Y))
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=Z6, labels=Y))
 
     return cost
 
@@ -129,7 +156,7 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=.009,
     num_epochs
     minibatch_size
     """
-    #ops.reset_default_graph
+    ops.reset_default_graph
     tf.set_random_seed(1)
     seed = 3
     (m, n_H0, n_W0, n_C0) = X_train.shape
@@ -140,9 +167,9 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=.009,
 
     parameters = initialize_parameters()
 
-    Z3 = forward_propogation(X, parameters)
+    Z6 = forward_propogation(X, parameters)
 
-    cost = compute_cost(Z3, Y)
+    cost = compute_cost(Z6, Y)
 
     optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
@@ -169,25 +196,25 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=.009,
                 costs.append(minibatch_cost)
 
 
-    # plot the cost
-    plt.plot(np.squeeze(costs))
-    plt.ylabel('cost')
-    plt.xlabel('iterations (per tens)')
-    plt.title("Learning rate =" + str(learning_rate))
-    plt.show()
+        # plot the cost
+        plt.plot(np.squeeze(costs))
+        plt.ylabel('cost')
+        plt.xlabel('iterations (per tens)')
+        plt.title("Learning rate =" + str(learning_rate))
+        plt.show()
 
-    # Calculate the correct predictions
-    predict_op = tf.argmax(Z3, 1)
-    correct_prediction = tf.equal(predict_op, tf.argmax(Y, 1))
+        # Calculate the correct predictions
+        predict_op = tf.argmax(Z6, 1)
+        correct_prediction = tf.equal(predict_op, tf.argmax(Y, 1))
 
-    # Calculate accuracy on the test set
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-    print(accuracy)
-    train_accuracy = accuracy.eval({X: X_train, Y: Y_train})
-    test_accuracy = accuracy.eval({X: X_test, Y: Y_test})
-    print("Train Accuracy:", train_accuracy)
-    print("Test Accuracy:", test_accuracy)
+        # Calculate accuracy on the test set
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+        print(accuracy)
+        train_accuracy = accuracy.eval({X: X_train, Y: Y_train})
+        test_accuracy = accuracy.eval({X: X_test, Y: Y_test})
+        print("Train Accuracy:", train_accuracy)
+        print("Test Accuracy:", test_accuracy)
 
-    return train_accuracy, test_accuracy, parameters
+        return train_accuracy, test_accuracy, parameters
 
 
