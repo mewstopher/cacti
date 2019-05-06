@@ -19,10 +19,29 @@ fold = "../input/train/"
 train_df.head()
 
 def onehot():
+    """
+    not WORKING!!!
+    """
     res = tf.one_hot(indices=[0,17499], depth=17500)
     with tf.Session() as sess:
         Y_tr= sess.run(res)
     return Y_tr.T
+
+def one_hot(labels, C):
+    """
+    makes one hot from labels
+
+    PARAMS
+    --------------
+    labels: label array
+    C: number of classes
+    """
+    C = tf.constant(C, name="C")
+    one_hot_mat = tf.one_hot(labels, C, axis=0)
+    with tf.Session() as sess:
+        one_hot = sess.run(one_hot_mat)
+
+    return one_hot
 
 def load_jpgs():
     """
@@ -190,9 +209,9 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=.009,
                         feed_dict={X:minibatch_X, Y:minibatch_Y})
                 minibatch_cost += temp_cost / num_minibatches
 
-            if print_cost == True and epoch % 5 == 0:
+            if print_cost == True:
                 print ("Cost after epoch %i: %f" % (epoch, minibatch_cost))
-            if print_cost == True and epoch % 1 == 0:
+            if print_cost == True:
                 costs.append(minibatch_cost)
 
 

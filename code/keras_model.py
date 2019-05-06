@@ -11,16 +11,16 @@ from cnn_utils.helper_functions import *
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from tensorflow.python.framework import ops
-from tensorflow.keras import Sequential
-from tensorflow.keras.layers import Conv2D, Dense, Flatten, BatchNormalization, Dropout, LeakyReLU, DepthwiseConv2D, Flatten
-from tensorflow.keras.layers import GlobalAveragePooling2D
-from tensorflow.keras.callbacks import ModelCheckpoint,ReduceLROnPlateau,EarlyStopping
-
 fold = os.listdir("../input/train/")
 train_df = pd.read_csv("../input/train.csv")
 
 fold = "../input/train/"
 train_df.head()
+
+# print an image
+#index = 2
+#plt.imshow(X_tr[index])
+#plt.show()
 
 def onehot():
     res = tf.one_hot(indices=[0,17499], depth=17500)
@@ -64,7 +64,7 @@ def create_placeholders(n_H0, n_W0, n_C0, n_y):
     n_C0 -- scalar, number of channels of the input
     n_y -- scalar, number of classes
     """
-    X = tf.placeholder(shape=(None, n_H0, n_W0, n_C0),dtype=tf.float32)
+    X = tf.placeholder(shape=(None, n_H0, n_W0),dtype=tf.float32)
     Y = tf.placeholder(shape=(None, n_y), dtype=tf.float32)
     return X, Y
 
@@ -75,19 +75,11 @@ def initialize_parameters():
     shapes are the shape of filters/weights
     """
 
-    W1 = tf.get_variable('W1', [3,3,3,64], initializer=tf.contrib.layers.xavier_initializer(seed = 0))
-    W2 = tf.get_variable('W2', [3,3,64,128], initializer=tf.contrib.layers.xavier_initializer(seed = 0))
-    W3 = tf.get_variable('W3', [3,3,128,256], initializer=tf.contrib.layers.xavier_initializer(seed = 0))
-    W4 = tf.get_variable('W4', [3,3,256,512], initializer=tf.contrib.layers.xavier_initializer(seed = 0))
-    W5 = tf.get_variable('W5', [3,3,512,512], initializer=tf.contrib.layers.xavier_initializer(seed = 0))
-
-    ### END CODE HERE ###
+    W1 = tf.get_variable('W1', [17500, 50], initializer=tf.contrib.layers.xavier_initializer(seed = 0))
+    W2 = tf.get_variable('W2',[50, 10], initializer=tf.contrib.layers.xavier_initializer(seed = 0))
 
     parameters = {"W1": W1,
             "W2": W2,
-            "W3": W3,
-            "W4": W4,
-            "W5": W5
             }
 
     return parameters
@@ -101,36 +93,13 @@ def forward_propogation(X, parameters):
     """
     W1 = parameters['W1']
     W2 = parameters['W2']
-    W3 = parameters['W3']
-    W4 = parameters['W4']
-    W5 = parameters['W5']
 
-    Z1 = tf.nn.conv2d(X, W1, strides=[1,1,1,1], padding='SAME')
+    Z1 = tf.nn.layers.fully_connected(X, W1)
     A1 = tf.nn.relu(Z1)
-    P1 = tf.nn.max_pool(A1, ksize=[1,2,2,1], strides=[1,2,2,1],
-            padding='SAME')
-    
-    Z2 = tf.nn.conv2d(P1, W2, strides=[1,1,1,1], padding='SAME')
+   
+    Z2 = tf.contrib.layers.fully_connected(A1, W2)
     A2 = tf.nn.relu(Z2)
-    P2 = tf.nn.max_pool(A2, ksize=[1,2,2,1], 
-            strides=[1,2,2,1],padding='SAME')
-    Z3 = tf.nn.conv2d(P2, W3, strides=[1,1,1,1], padding='SAME')
-    A3 = tf.nn.relu(Z3)
-    P3 = tf.nn.max_pool(A3, strides=[1,1,1,1],
-            ksize=[1,2,2,1], padding='SAME')
-
-    Z4 = tf.nn.conv2d(P3, W4, strides=[1,1,1,1], padding='SAME')
-    A4 = tf.nn.relu(Z4)
-    P4 = tf.nn.max_pool(A4, strides=[1,1,1,1],
-            ksize=[1,2,2,1],padding='SAME')
-
-    Z5 = tf.nn.conv2d(P4, W5, strides=[1,1,1,1], padding='SAME')
-    A5 = tf.nn.relu(Z5)
-    P5 = tf.nn.max_pool(A5, strides=[1,1,1,1],
-            ksize=[1,2,2,1], padding='SAME')
-
-    P5 = tf.contrib.layers.flatten(P5)
-    Z6 = tf.contrib.layers.fully_connected(P5, 2,
+    Z6 = tf.contrib.layers.fully_connected(A2, 2,
             activation_fn = None)
 
     return Z6
