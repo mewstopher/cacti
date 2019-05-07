@@ -15,6 +15,7 @@ from tensorflow.python.framework import ops
 fold = os.listdir("../input/train/")
 train_df = pd.read_csv("../input/train.csv")
 
+test_fold = "../input/test/"
 fold = "../input/train/"
 train_df.head()
 
@@ -60,6 +61,19 @@ def load_jpgs():
     Y_tr = np.asarray(Y_tr)
 
     return X_tr, Y_tr
+
+def load_test_jpgs():
+    """
+    loads test file
+    """
+    X_te = []
+    for i in os.listdir(test_fold):
+        X_te.append(cv2.imread(test_fold + i))
+
+    X_te = np.asarray(X_te)
+    X_te = X_te.astype('float32')
+    X_te /= 255
+    return X_te
 
 
 def split(X_tr, Y_tr):
@@ -160,7 +174,7 @@ def compute_cost(Z6, Y):
 
     return cost
 
-def model(X_train, Y_train, X_test, Y_test, learning_rate=.0003,
+def model(X_train, Y_train, X_test, Y_test, test_imgs, learning_rate=.0003,
         num_epochs=100, minibatch_size=64, print_cost=True):
     """
     runs model
@@ -203,12 +217,14 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=.0003,
             minibatches = random_mini_batches(X_train, Y_train,
                     minibatch_size, seed)
 
-            for minibatch in minibatches:
-                (minibatch_X, minibatch_Y) = minibatch
-                print('ok til begining of minibtch loop')
-                _, temp_cost = sess.run([optimizer, cost],
-                        feed_dict={X:minibatch_X, Y:minibatch_Y})
-                minibatch_cost += temp_cost / num_minibatches
+            print('USING ONLY FIRST MINIBATCH. DELETE AfTER TETING!')
+            
+            #for minibatch in minibatches:
+            minibatch = minibatches[1]
+            (minibatch_X, minibatch_Y) = minibatch
+            _, temp_cost = sess.run([optimizer, cost],
+                    feed_dict={X:minibatch_X, Y:minibatch_Y})
+            minibatch_cost += temp_cost / num_minibatches
 
             if print_cost == True:
                 print ("Cost after epoch %i: %f" % (epoch, minibatch_cost))
@@ -234,7 +250,14 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=.0003,
         test_accuracy = accuracy.eval({X: X_test, Y: Y_test})
         print("Train Accuracy:", train_accuracy)
         print("Test Accuracy:", test_accuracy)
+       
+       # Predict on REAL test set
+        print('using test set')
+        predicted_lables = np.zeros(test_imgs.shape[0])
+        for i in range(0, test_imgs.shape[0]):
+            predicted_lables[i*minibatch_size : (i+1)*minibatch_size] = predict_op.eval(feed_dict={X: test_imgs[i*minibatch_size : (i+1)*minibatch_size]})
 
-        return train_accuracy, test_accuracy, parameters
+
+        return train_accuracy, test_accuracy, parameters, predicted_lables
 
 
