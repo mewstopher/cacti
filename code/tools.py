@@ -160,7 +160,7 @@ def compute_cost(Z6, Y):
 
     return cost
 
-def model(X_train, Y_train, X_test, Y_test, learning_rate=.009,
+def model(X_train, Y_train, X_test, Y_test, learning_rate=.0003,
         num_epochs=100, minibatch_size=64, print_cost=True):
     """
     runs model
@@ -205,6 +205,7 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=.009,
 
             for minibatch in minibatches:
                 (minibatch_X, minibatch_Y) = minibatch
+                print('ok til begining of minibtch loop')
                 _, temp_cost = sess.run([optimizer, cost],
                         feed_dict={X:minibatch_X, Y:minibatch_Y})
                 minibatch_cost += temp_cost / num_minibatches
