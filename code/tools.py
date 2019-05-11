@@ -244,18 +244,17 @@ def model(X_train, Y_train, X_test, Y_test, test_imgs, learning_rate=.0003,
         correct_prediction = tf.equal(predict_op, tf.argmax(Y, 1))
 
         # Calculate accuracy on the test set
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-        print(accuracy)
-        train_accuracy = accuracy.eval({X: X_train, Y: Y_train})
-        test_accuracy = accuracy.eval({X: X_test, Y: Y_test})
-        print("Train Accuracy:", train_accuracy)
-        print("Test Accuracy:", test_accuracy)
+#        accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+#        print(accuracy)
+#        train_accuracy = accuracy.eval({X: X_train, Y: Y_train})
+#        test_accuracy = accuracy.eval({X: X_test, Y: Y_test})
+#        print("Train Accuracy:", train_accuracy)
+#        print("Test Accuracy:", test_accuracy)
        
        # Predict on REAL test set
         print('using test set')
-        predicted_lables = np.zeros(test_imgs.shape[0])
-        for i in range(0, test_imgs.shape[0]):
-            predicted_lables[i*minibatch_size : (i+1)*minibatch_size] = predict_op.eval(feed_dict={X: test_imgs[i*minibatch_size : (i+1)*minibatch_size]})
+        predicted_lables = np.zeros(test_imgs.shape[0]) 
+        predicted_lables[0:3999] = predict_op.eval(feed_dict={X: test_imgs[0:3999]})
 
 
         return train_accuracy, test_accuracy, parameters, predicted_lables
