@@ -1,8 +1,12 @@
 from keras_model  import *
 import keras
 from keras import applications
-from keras.models import Sequential
 X_tr, Y_tr = load_jpgs(fold, train_df, 'id', 'has_cactus')
+
+# resize Xtr to be 224x224 images
+#X_tr = tf.image.resize_images(X_tr, (224,224))
+#res = cv2.resize(X_tr, dsize=(224,224), interpolation=cv2.INTER_CUBIC)
+#from skimage.transform import resize
 
 X_train, X_test, y_train, y_test = split(X_tr, Y_tr)
 
@@ -19,33 +23,22 @@ test_imgs = load_test_jpgs()
 # initialize model
 cactiModel = CactiModel(X_train[0].shape)
 
-vggModel = applications.VGG16(weights='imagenet',input_shape=(32,32,3), include_top=False)
-
-model = Sequential()
-model.add(vggModel)
-model.add(Flatten())
-model.add(Dense(256))
-model.add(Activation('relu'))
-model.add(Dropout(0.5))
-model.add(Dense(1))
-model.add(Activation('sigmoid'))
-
+vggModel = applications.VGG16(weights=None, classes=1,input_shape=(32,32,3))
 
 # compile model
-model.compile(optimizer='Adam', loss='binary_crossentropy', metrics=['accuracy'])
-
+vggModel.compile(optimizer='Adam', loss='binary_crossentropy', metrics=['accuracy'])
 
 # train model
-model.fit(x = X_train, y = y_train, epochs = 2, batch_size = 32)
+vggModel.fit(x = X_train, y = y_train, epochs = 2, batch_size = 32)
 
- 
-preds = model.evaluate(x = X_test, y =y_test )
+
+preds = cactiModel.evaluate(x = X_test, y =y_test )
 
 print()
 print ("Loss = " + str(preds[0]))
 print ("Test Accuracy = " + str(preds[1]))
 
-test_preds = model.predict(test_imgs)
+test_preds = cactiModel.predict(test_imgs)
 
 
 sub_df = pd.DataFrame(test_preds, columns=['has_cactus'])
@@ -62,6 +55,6 @@ for i, img in enumerate(test_folder):
         sub_df.set_value(i,'id',img)
 
 
-sub_df.to_csv("../output/sub2.csv")
+sub_df.to_csv("../output/sub1.csv")
 
 
