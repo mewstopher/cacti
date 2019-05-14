@@ -1,8 +1,8 @@
-#README
+# README
 
 This is a practice problem using CNNs on a kaggle competition. The only goal here is to gain practice coding nueral networks, and a better understanding of how to effectively code them.
 
-#Project status
+# Project status
 ---------------------------------
 CNN used to identify whether or not cactus in picture.
 
@@ -13,7 +13,7 @@ Dense_net.py uses a fully connected 2 layer network. This one work, but accuracy
 To compare with a pretrained model, VGG16 is imported and used in run_keras.py
 Results give test/train ~ .95, .90 respectively.
 
-##TODO
+## TODO
 1. Rename file names to appropriate things
 2. Clean up pretrained code
 3. code up vgg16 from scratch using both keras/tensorflow
