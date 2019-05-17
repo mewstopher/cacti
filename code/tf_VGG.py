@@ -1,5 +1,5 @@
 import tensorflow as tf
-import os 
+import os
 import tqdm
 #import tqdm_notebook
 import pandas as pd
@@ -218,7 +218,7 @@ def model(X_train, Y_train, X_test, Y_test, test_imgs, learning_rate=.0003,
                     minibatch_size, seed)
 
             print('USING ONLY FIRST MINIBATCH. DELETE AfTER TETING!')
-            
+
             #for minibatch in minibatches:
             minibatch = minibatches[1]
             (minibatch_X, minibatch_Y) = minibatch
@@ -250,10 +250,10 @@ def model(X_train, Y_train, X_test, Y_test, test_imgs, learning_rate=.0003,
 #        test_accuracy = accuracy.eval({X: X_test, Y: Y_test})
 #        print("Train Accuracy:", train_accuracy)
 #        print("Test Accuracy:", test_accuracy)
-       
+
        # Predict on REAL test set
         print('using test set')
-        predicted_lables = np.zeros(test_imgs.shape[0]) 
+        predicted_lables = np.zeros(test_imgs.shape[0])
         predicted_lables[0:3999] = predict_op.eval(feed_dict={X: test_imgs[0:3999]})
 
 
