@@ -1,4 +1,5 @@
 # README
+Babas First CNN
 
 This is a practice problem using CNNs on a kaggle competition. The only goal here is to gain practice coding nueral networks, and a better understanding of how to effectively code them.
 
@@ -13,11 +14,15 @@ Dense_net.py uses a fully connected 2 layer network. This one work, but accuracy
 To compare with a pretrained model, VGG16 is imported and used in run_keras.py
 Results give test/train ~ .95, .90 respectively.
 
-## TODO
-1. Rename file names to appropriate things
-2. Clean up pretrained code
-3. code up vgg16 from scratch using both keras/tensorflow
-4. find best model for competition
+Training model (VGG) from scrach works, but pretained model is (obviously) a much better option for accuracy. 
 
+Training last 2 layers of pretrained VGG results in .98 accuracy on actual test data. While this is not great for the competiton results, it is good enough to move on. 
 
+List of files:
+1. keras_model: codes up a VGG from scratch. 
+2. Dense_net: a fully connected 2 layer neural net
+3. imports: contains all imported modules used in model scripts
+4. run_dense/keras: script for running dense and VGG(from scratch)
+5. run VGG: runs pre-trained VGG
+6. tf_VGG: VGG16 coded from scatch using tensorflow
 

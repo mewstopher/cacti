@@ -38,7 +38,7 @@ model.compile(optimizer='Adam', loss='binary_crossentropy', metrics=['accuracy']
 # train model
 model.fit(x = X_train, y = y_train, epochs = 2, batch_size = 32)
 
- 
+
 preds = model.evaluate(x = X_test, y =y_test )
 
 print()

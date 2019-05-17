@@ -5,7 +5,7 @@ X_tr, Y_tr = load_jpgs()
 # print an image
 
 
-index = 10 
+index = 10
 plt.imshow(X_train[index])
 plt.show()
 
