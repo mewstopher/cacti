@@ -2,7 +2,7 @@ from keras_model  import *
 import keras
 from keras import applications
 from keras.models import Sequential
-X_tr, Y_tr = load_jpgs(fold, train_df, 'id', 'has_cactus')
+X_tr, Y_tr = load_jpgs(fold, train_df, 32, 'id', 'has_cactus')
 
 X_train, X_test, y_train, y_test = split(X_tr, Y_tr)
 
