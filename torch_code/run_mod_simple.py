@@ -3,6 +3,8 @@ from preprocess import *
 from model_simple import *
 from train_mod import *
 from tqdm import tqdm
+
+# get data into loaders
 cacti_dataset = CactiDataset(csv_file="../input/train.csv", root_dir="../input/train/",
                              transform=transforms.Compose([ToTensor()]))
 
@@ -19,7 +21,7 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=5,
 # initialize model class
 net = Net()
 
-# define loss
+# define loss and hyperparameters
 error = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(net.parameters(), lr=.00001, momentum=.9)
 num_iterations = 2500
@@ -29,6 +31,8 @@ num_epochs = 2
 if __name__ == '__main__':
     iteration, loss, accuracy = train_mod(net,train_loader, test_loader,
                                           error, optimizer, num_iterations, num_epochs)
+
+    sys.exit()
 
 loss_list = []
 iteration_list = []
