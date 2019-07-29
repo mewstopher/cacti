@@ -1,26 +1,4 @@
-
-# this is a tutorial for loading data with pytorch. later we will make this into
-# several scripts
-# lets start with loading in the train.csv file that contains names of pictures and labels
-
-from __future__ import print_function, division
-import os
-import torch
-import pandas as pd
-from skimage import io, transform
-import numpy as np
-import matplotlib.pyplot as plt
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
-
-# Ignore warnings
-import warnings
-warnings.filterwarnings("ignore")
-
-#plt.ion()
-
-# dataset has 17500 images (rows) and labels 0, 1 for no-cacti, cacti
-
+from imports import *
 
 class CactiDataset(Dataset):
     """ cacti dataset"""
@@ -68,19 +46,3 @@ class ToTensor(object):
         return {'image': torch.from_numpy(image),
                 'cacti': torch.from_numpy(cacti)}
 
-cacti_dataset = CactiDataset(csv_file="../input/train.csv", root_dir="../input/train/",
-                             transform=transforms.Compose([ToTensor()]))
-
-for i in range(len(cacti_dataset)):
-    sample = cacti_dataset[i]
-
-    print(i, sample['image'].size(), sample['cacti'].size())
-
-    if i == 3:
-        break
-
-data_loader = torch.utils.data.DataLoader(sample, batch_size=4, shuffle=False, num_workers=2)
-
-for i, data in enumerate(data_loader):
-    images, dat = data
-    images.shape
