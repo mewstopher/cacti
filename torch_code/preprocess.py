@@ -46,3 +46,27 @@ class ToTensor(object):
         return {'image': torch.from_numpy(image),
                 'cacti': torch.from_numpy(cacti)}
 
+
+class Rescale(object):
+    """
+    Rescale the image to a sample of a given size
+    """
+    def __init__(self, output_size):
+        assert isinstance(output_size, (int, tuple))
+        self.output_size =output_size
+
+    def __call__(self, sample):
+        image, cacti = sample['image'], sample['cacti']
+        h, w = image.shape[:2]
+        if isinstance(self.output_size, int):
+            if h > w:
+                new_h, new_w = self.output_size * h / w, self.output_size
+            else:
+                new_h, new_w = self.output_size, self.output_size * w / h
+        else:
+            new_h, new_w = self.output_size
+        new_h, new_w = int(new_h), int(new_w)
+        image = transform.resize(image, (new_h, new_w))
+
+        return {'image': image, 'cacti': cacti}
+
