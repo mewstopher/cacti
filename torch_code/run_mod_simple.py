@@ -2,7 +2,6 @@ from imports import *
 from preprocess import *
 from model_simple import *
 from train_mod import *
-from tqdm import tqdm
 
 # get data into loaders
 cacti_dataset = CactiDataset(csv_file="../input/train.csv", root_dir="../input/train/",
@@ -40,7 +39,7 @@ accuracy_list = []
 count = 0
 num_epochs = 2
 
-for e in tqdm(range(num_epochs)):
+for e in range(num_epochs):
     for i, data in enumerate(train_loader):
         batch = data['image'].to(torch.float32)
         batch = Variable(batch)
@@ -69,7 +68,13 @@ for e in tqdm(range(num_epochs)):
             accuracy_list.append(accuracy)
         if count % 100 == 0:
             print('iteration: {} loss: {} accuracy {}'.format(count,loss.item(),accuracy))
+        if count % 300 == 0:
+            torch.save(net.state_dict(), "../output/model_siple")
 
+# load trained model
+model = Net()
+model.load_state_dict(torch.load("../output/model_simple"))
+model.eval()
 
 # visualization loss 
 plt.plot(iteration_list,loss_list)
